@@ -1,2 +1,2 @@
 # ParkingBackEnd
-Backend para aplicación de getión de parqueaderos PSL
+Backend para aplicación de gestión de parqueaderos PSL

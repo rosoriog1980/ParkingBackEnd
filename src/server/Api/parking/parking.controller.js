@@ -5,13 +5,13 @@ const parkingStatusEnum = require('./parking.statusEnum');
 function respondWithResult(res, code) {
     const statusCode = code || status.OK;
     return (result) => {
-      if (result) {
-        return res.status(statusCode).json(result);
-      }
-      if (result === 0) {
-        return res.status(statusCode).json(result);
-      }
-      return res.status(statusCode);
+        if (result) {
+            return res.status(statusCode).json(result);
+        }
+        if (result === 0) {
+            return res.status(statusCode).json(result);
+        }
+        return res.status(statusCode);
     };
 }
   
@@ -35,6 +35,19 @@ function newParking(req, res) {
     .catch(respondWithError(res));
 }
 
+function changeStatus(req, res) {
+    const { id, status } = req.body;
+	Parking.findByIdAndUpdate(id, { $set:{ parkingStatus: status } },{ new: true })
+	.then(respondWithResult(res))
+	.catch(respondWithError(res));
+}
+
+function deleteParking(req, res) {
+    Parking.findByIdAndRemove(req.query.id)
+    .then(respondWithResult(res))
+    .catch(respondWithError(res));
+}
+
 module.exports = {
-    getParkingLots, newParking
+    getParkingLots, newParking, changeStatus, deleteParking
 };

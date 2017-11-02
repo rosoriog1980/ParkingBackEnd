@@ -1,0 +1,4 @@
+const AVAILABLE = 'AVAILABLE';
+const NOT_AVAILABLE = 'NOT_AVAILABLE';
+
+module.exports = { AVAILABLE, NOT_AVAILABLE };

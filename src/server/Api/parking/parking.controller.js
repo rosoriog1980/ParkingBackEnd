@@ -13,13 +13,12 @@ function respondWithResult(res, code) {
       }
       return res.status(statusCode);
     };
-  }
+}
   
-  function respondWithError(res, code) {
+function respondWithError(res, code) {
     const statusCode = code || status.INTERNAL_SERVER_ERROR;
     return err => res.status(statusCode).send(err);
-  }
-
+}
 
 function getParkingLots(req, res){
     Parking.find({})

@@ -77,7 +77,8 @@ End-point para la gestión de los usuarios y vehiculos.
                     "vehicleModel": "Tiida"
                 }
             ]
-        }```
+        }
+        ```
 
         Para crear un usuario **sin** vehiculos asociados.
 
@@ -91,4 +92,5 @@ End-point para la gestión de los usuarios y vehiculos.
             
             "vehicles": [
             ]
-        }```
+        }
+        ```

@@ -1,6 +1,7 @@
 const status = require('http-status');
 const User = require('./user.model');
 
+
 function respondWithResult(res, code) {
     const statusCode = code || status.OK;
     return (result) => {

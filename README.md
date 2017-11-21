@@ -8,6 +8,8 @@ Backend para aplicación de gestión de parqueaderos PSL
 
 Para instalar los demás pre-requisitos, ejecutar el comando *npm install* en la raiz de la carpeta del proyecto.
 
+Ejecutar el comando *npm install -g gulp*, para instalar el GULP que se utilizará para ejecutar la solución.
+
 Para ejecutar el protecto en modo debug, debe estar en ejecución el servidor de MongoDB y ejecutar el comando *gulp serve* en la consola de NodeJS
 
 ## Endpoints
@@ -44,5 +46,15 @@ End-point para la gestión del recurso parqueaderos.
 
 * DELETE ('/'): borra un parqueadero de acuerdo al Id proporcionado.
     * Parámetros:
+
         QueryString,
         id=59fa4b508495b50560e1c58c
+
+
+###### **User**
+End-piont para la gestión de los usuarios y vehiculos.
+
+* GET ('/'): obtiene todos los usuarios registrados en el sistema.
+    * Parámetros:
+
+* POST ('/'): crea un nuevo usuario en el sistema. Los usuarios pueden crearse con o sin vehiculos asociados.

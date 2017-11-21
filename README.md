@@ -16,7 +16,7 @@ Para ejecutar el protecto en modo debug, debe estar en ejecución el servidor de
 
 A continuación se describen los end-points con sus métodos y ejemplos de consumo.
 
-###### **Parking**
+###### Parking
 End-point para la gestión del recurso parqueaderos.
 
 * GET ('/'): obtiene el listado completo de parqueaderos en el sistema.
@@ -51,10 +51,44 @@ End-point para la gestión del recurso parqueaderos.
         id=59fa4b508495b50560e1c58c
 
 
-###### **User**
-End-piont para la gestión de los usuarios y vehiculos.
+###### User
+End-point para la gestión de los usuarios y vehiculos.
 
 * GET ('/'): obtiene todos los usuarios registrados en el sistema.
     * Parámetros:
 
 * POST ('/'): crea un nuevo usuario en el sistema. Los usuarios pueden crearse con o sin vehiculos asociados.
+    * Parámetros: 
+        Body,
+
+        Para crear un usuario con 1 o más vehiculos asociados:
+        ```JSON
+        {
+            "user": {
+                "userName": "Ricardo Osorio",
+                "userEmail": "rosoriog@psl.com.co",
+                "userTelNumber": "3108747886"
+            },
+            
+            "vehicles": [
+                {
+                    "vehicleLicensePlate": "HAX045",
+                    "vehicleBrand": "Nissan",
+                    "vehicleModel": "Tiida"
+                }
+            ]
+        }```
+
+        Para crear un usuario **sin** vehiculos asociados.
+
+        ```JSON
+        {
+            "user": {
+                "userName": "Ricardo Osorio",
+                "userEmail": "rosoriog@psl.com.co",
+                "userTelNumber": "3108747886"
+            },
+            
+            "vehicles": [
+            ]
+        }```

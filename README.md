@@ -67,7 +67,7 @@ End-point para la gestión de los usuarios y vehiculos.
             "user": {
                 "userName": "Ricardo Osorio",
                 "userEmail": "rosoriog@psl.com.co",
-                "userTelNumber": "3108747886"
+                "userTelNumber": "3105555555"
             },
             
             "vehicles": [
@@ -87,10 +87,47 @@ End-point para la gestión de los usuarios y vehiculos.
             "user": {
                 "userName": "Ricardo Osorio",
                 "userEmail": "rosoriog@psl.com.co",
-                "userTelNumber": "3108747886"
+                "userTelNumber": "3105555555"
             },
             
             "vehicles": [
             ]
         }
         ```
+
+* POST ('/vehicle'): crea un nuevo vehiculo a un usuario existente.
+    * Parámetros:
+        Body,
+
+        ```
+        JSON
+        {
+            "userId": "5a142ef2987bbe17388d9a02",
+            
+            "vehicles":[
+                    {
+                        "vehicleLicensePlate": "ABC789",
+                        "vehicleBrand": "BMW",
+                        "vehicleModel": "Alpine"
+                    }
+                ]
+        }
+        ```
+
+* DELETE ('/'): borra un usuario de acuerdo a Id proporcionado.
+    * Parámetros:
+
+        QueryString,
+        id=59fa4b508495b50560e1c58c
+
+* DELETE ('/vehicle'): borra un vehiculo a un usuario.
+    * Parámetros:
+        Body,
+
+        ```JSON
+        {
+            "userId": "5a142ef2987bbe17388d9a02",
+            "vehicleId": "5a144d7f7e56273818c4712b"
+        }
+        ```
+

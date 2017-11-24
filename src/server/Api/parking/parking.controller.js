@@ -1,6 +1,7 @@
 const status = require('http-status');
 const Parking = require('./parking.model');
 const parkingStatusEnum = require('./parking.statusEnum');
+const { createHistoric } = require('../historic/historic.controller');
 
 function respondWithResult(res, code) {
     const statusCode = code || status.OK;
@@ -36,8 +37,9 @@ function newParking(req, res) {
 }
 
 function changeStatus(req, res) {
-    const { id, status } = req.body;
-	Parking.findByIdAndUpdate(id, { $set:{ parkingStatus: status } },{ new: true })
+    const { id, status, userId } = req.body;
+    Parking.findByIdAndUpdate(id, { $set:{ parkingStatus: status, userId: userId } },{ new: true })
+    .then(parking => createHistoric(parking))
 	.then(respondWithResult(res))
 	.catch(respondWithError(res));
 }

@@ -19,10 +19,10 @@ function respondWithError(res, code) {
     return err => res.status(statusCode).send(err);
 }
 
-function createHistoric(parking) {
+function createHistoric(parking, userId) {
     const historic = new Historic({
         parkingId: parking._id,
-        userId: parking.userId,
+        userId: userId,
         parkingStatus: parking.parkingStatus
     });
 

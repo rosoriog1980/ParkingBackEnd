@@ -38,8 +38,9 @@ function newParking(req, res) {
 
 function changeStatus(req, res) {
     const { id, status, userId } = req.body;
-    Parking.findByIdAndUpdate(id, { $set:{ parkingStatus: status, userId: userId } },{ new: true })
-    .then(parking => createHistoric(parking))
+    const user = status === 'AVAILABLE' ? undefined : userId;
+    Parking.findByIdAndUpdate(id, { $set:{ parkingStatus: status, userId: user } },{ new: true })
+    .then(parking => createHistoric(parking, userId))
 	.then(respondWithResult(res))
 	.catch(respondWithError(res));
 }

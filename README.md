@@ -39,7 +39,8 @@ End-point para la gestión del recurso parqueaderos.
         ```JSON
         {
             "id": "59fa4b508495b50560e1c58c",
-	        "status": "NOT_AVAILABLE"
+	        "status": "NOT_AVAILABLE",
+            "userId": "5a1580c5ad2416001404060b"
         }
         ```
         Los estados posibles son ["NOT_AVAILABLE", "AVAILABLE"]
@@ -131,3 +132,11 @@ End-point para la gestión de los usuarios y vehiculos.
         }
         ```
 
+###### Historic
+End-point para consultar el Histórico de utilización de los parqueaderos
+
+* GET ('/parking'): consulta histórico por el Id de un parqueadero específico.
+    * Parámetros:
+
+        QueryString,
+        parkingId=59fa4b508495b50560e1c58c

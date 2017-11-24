@@ -13,6 +13,7 @@
     "babel-core": "^6.26.0",
     "body-parser": "^1.18.2",
     "connect-livereload": "^0.6.0",
+    "cors": "^2.8.4",
     "express": "^4.16.2",
     "gulp-babel": "^7.0.0",
     "gulp-livereload": "^3.8.1",

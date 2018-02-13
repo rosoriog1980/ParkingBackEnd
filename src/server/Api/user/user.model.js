@@ -5,6 +5,7 @@ const userSchema = new Schema({
     userName: {type: String, required: true},
     userEmail: {type: String, required: true},
     userTelNumber: {type: String, required: true},
+    branchOffice: {type: String, required: false},
     userImage: {type: String, required: false},
     vehicles:[
         {

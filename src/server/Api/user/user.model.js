@@ -11,7 +11,7 @@ const userSchema = new Schema({
         {
             vehicleLicensePlate: {type: String, required: false},
             vehicleBrand: {type: String, required: false},
-            vehicleModel: {type: String, required: false},
+            vehicleColor: {type: String, required: false},
             vehicleImage: {type: String, required: false}
         }
     ]

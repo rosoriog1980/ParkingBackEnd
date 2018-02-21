@@ -7,6 +7,8 @@ const userSchema = new Schema({
     userTelNumber: {type: String, required: true},
     branchOffice: {type: String, required: false},
     userImage: {type: String, required: false},
+    userPassword: {type: String, required: false},
+    loginToken: {type: String, required: false},
     vehicles:[
         {
             vehicleLicensePlate: {type: String, required: false},

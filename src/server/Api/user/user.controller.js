@@ -1,5 +1,6 @@
 const status = require('http-status');
 const User = require('./user.model');
+const Guid = require('guid');
 
 
 function respondWithResult(res, code) {
@@ -79,6 +80,41 @@ function deleteVehicle(user, vehicleId){
     return user.save();
 }
 
+function loginUser(req, res) {
+    const userName = req.body.user;
+    const userPwd = req.body.pwd;
+
+    User.findOne({userEmail: userName, userPassword: userPwd})
+    .then(user => {
+        user.loginToken = Guid.raw();
+        user.save();
+        res.send(user.loginToken);
+        respondWithResult(res);
+    })
+    .catch(err => {
+        res.status = status.OK;
+        res.send("");
+        respondWithResult(res);
+        }
+    );
+}
+
+function apiValidateToken(req, res){
+    const token = req.body.usr;
+    User.findOne({loginToken: token})
+    .then(user => {
+        user.loginToken = Guid.raw();
+        user.save();
+        res.send({result: true, newId: user.loginToken});
+        respondWithResult(res);
+    })
+    .catch(err => {
+        res.send({result: false});
+        respondWithResult(res);
+    });
+}
+
+
 module.exports= {
-    getUsers, createUser, deleteUser, newVehicle, removeVehicle
+    getUsers, createUser, deleteUser, newVehicle, removeVehicle, loginUser, apiValidateToken
 };

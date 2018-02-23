@@ -22,9 +22,17 @@ function respondWithError(res, code) {
 }
 
 function getUsers(req, res) {
-    User.find({})
-    .then(respondWithResult(res))
-    .catch(respondWithError(res));
+    const Token = req.get('Token');
+
+    if (Token.includes('Admin')) {
+        User.find({})
+        .then(respondWithResult(res))
+        .catch(respondWithError(res));
+    } else {
+        User.find({loginToken: Token})
+        .then(respondWithResult(res))
+        .catch(respondWithError(res));
+    }
 }
 
 function createUser(req, res) {

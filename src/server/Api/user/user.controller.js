@@ -29,7 +29,7 @@ function getUsers(req, res) {
         .then(respondWithResult(res))
         .catch(respondWithError(res));
     } else {
-        User.find({loginToken: Token})
+        User.find({loginToken: Token},'-userPassword -loginToken')
         .then(respondWithResult(res))
         .catch(respondWithError(res));
     }

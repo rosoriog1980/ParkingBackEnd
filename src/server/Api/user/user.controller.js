@@ -51,6 +51,14 @@ function deleteUser(req, res) {
     .catch(respondWithError(res));
 }
 
+function updateUser(req, res) {
+    const user = req.body.user;
+    User.findByIdAndUpdate(user._id, { $set:{userTelNumber: user.userTelNumber, 
+        branchOffice: user.branchOffice, vehicles: user.vehicles } }, {new: true})
+    .then(respondWithResult(res))
+    .catch(respondWithError(res));
+}
+
 function newVehicle(req, res) {
     User.findOne({_id: req.body.userId})
     .then(user=> addVehicles(user, req.body.vehicles))
@@ -68,7 +76,10 @@ function removeVehicle(req, res) {
 function addVehicles(user, vehicles) {
     
     vehicles.forEach(element => {
-        user.vehicles.push(element);
+        const v = user.vehicles.find(v => v.vehicleLicensePlate === element.vehicleLicensePlate);
+        if (v === undefined) {
+            user.vehicles.push(element);
+        }
     });
 
     return user.save();
@@ -124,5 +135,5 @@ function apiValidateToken(req, res){
 
 
 module.exports= {
-    getUsers, createUser, deleteUser, newVehicle, removeVehicle, loginUser, apiValidateToken
+    getUsers, createUser, deleteUser, updateUser, newVehicle, removeVehicle, loginUser, apiValidateToken
 };

@@ -1,15 +1,16 @@
 const router = require('express').Router();
 const User = require('./user.model');
-const { getUsers, createUser, deleteUser, newVehicle, removeVehicle, loginUser, apiValidateToken } = require('./user.controller');
+const { getUsers, createUser, deleteUser, updateUser, newVehicle, removeVehicle, loginUser, apiValidateToken } = require('./user.controller');
 
 router.post('/auth', loginUser);
 router.post('/validAuth', apiValidateToken)
 router.post('/', createUser);
 
-router.get('/', isAuthenticated, getUsers);
+router.get('/',  getUsers);
+router.put('/', updateUser);
 router.post('/vehicle', newVehicle);
-router.delete('/', deleteUser);
-router.delete('/vehicle', removeVehicle);
+router.delete('/', isAuthenticated, deleteUser);
+router.delete('/vehicle',  removeVehicle);
 
 
 function isAuthenticated(req, res, next){

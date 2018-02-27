@@ -6,12 +6,12 @@ router.post('/auth', loginUser);
 router.post('/validAuth', apiValidateToken)
 router.post('/', createUser);
 
-router.get('/',  getUsers);
-router.put('/', updateUser);
-router.post('/vehicle', newVehicle);
+router.get('/', isAuthenticated,  getUsers);
+router.put('/', isAuthenticated, updateUser);
 router.delete('/', isAuthenticated, deleteUser);
-router.delete('/vehicle',  removeVehicle);
 
+router.post('/vehicle', newVehicle);
+router.delete('/vehicle',  removeVehicle);
 
 function isAuthenticated(req, res, next){
     const Token = req.get('Token');

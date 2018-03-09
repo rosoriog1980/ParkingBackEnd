@@ -5,7 +5,7 @@ const userSchema = new Schema({
     userName: {type: String, required: true},
     userEmail: {type: String, required: true},
     userTelNumber: {type: String, required: true},
-    branchOffice: {type: String, required: false},
+    branchOfficeId: {type: Schema.Types.ObjectId, ref: 'BranchOffice', required:true},
     userImage: {type: String, required: false},
     userPassword: {type: String, required: false},
     loginToken: {type: String, required: false},

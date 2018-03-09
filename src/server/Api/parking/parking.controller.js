@@ -1,7 +1,9 @@
 const status = require('http-status');
 const Parking = require('./parking.model');
+const ParkingZone = require('../parkingZone/parkingZone.model');
 const parkingStatusEnum = require('./parking.statusEnum');
 const { createHistoric } = require('../historic/historic.controller');
+const { getZones } = require('../parkingZone/parkingZone.controller');
 
 function respondWithResult(res, code) {
     const statusCode = code || status.OK;
@@ -73,6 +75,34 @@ function removeParkingSpace(parking, spaceId){
     return parking.save();
 }
 
+function homeQuery(req, res){
+    const officeId = req.query.officeId;
+    const resul = {
+        zones: []
+    };
+    let countAvailable = 0;
+
+    ParkingZone.find({branchOfficeId: officeId})
+    .then(parkingZones => {
+        parkingZones.forEach(zone => {
+            Parking.find({parkingZoneId: zone._id})
+            .then(parkings => {
+                parkings.forEach(park => {
+                    park.parkings.forEach(space => {
+                        countAvailable += 1;
+                    });
+                    resul.zones.push(
+                        {
+                            zoneName: zone.zoneName,
+                            availabiity: countAvailable
+                        }
+                    );
+                });
+            });
+        });
+    });
+}
+
 module.exports = {
-    getParkingLots, newParking, changeStatus, deleteParking
+    getParkingLots, newParking, changeStatus, deleteParking, homeQuery
 };

@@ -1,5 +1,5 @@
 const status = require('http-status');
-const Historic = require('./historic.model');
+const ParkingZone = require('./parkingZone.model');
 
 function respondWithResult(res, code) {
     const statusCode = code || status.OK;
@@ -19,24 +19,22 @@ function respondWithError(res, code) {
     return err => res.status(statusCode).send(err);
 }
 
-function createHistoric(parkingId, userId, status) {
-    const historic = new Historic({
-        parkingId: parkingId,
-        userId: userId,
-        parkingStatus: status
-    });
+function newZone(req, res) {
+    const zone = req.body.zone;
 
-    return historic.save();
+    ParkingZone.create(zone)
+    .then(respondWithResult(res))
+    .catch(respondWithError(res));
 }
 
-function historicByParkingId(req, res) {
-    Historic.find({parkingId: req.query.parkingId})
-    .sort({changeStatusDate: 1})
+function getZones(req, res) {
+    const officeId = req.query.officeId;
+
+    ParkingZone.find({branchOfficeId: officeId})
     .then(respondWithResult(res))
     .catch(respondWithError(res));
 }
 
 module.exports = {
-    createHistoric,
-    historicByParkingId
-}
+    newZone, getZones
+};

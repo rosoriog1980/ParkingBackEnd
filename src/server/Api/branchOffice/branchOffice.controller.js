@@ -1,5 +1,5 @@
 const status = require('http-status');
-const Historic = require('./historic.model');
+const BranchOffice = require('./branchOffice.model');
 
 function respondWithResult(res, code) {
     const statusCode = code || status.OK;
@@ -19,24 +19,20 @@ function respondWithError(res, code) {
     return err => res.status(statusCode).send(err);
 }
 
-function createHistoric(parkingId, userId, status) {
-    const historic = new Historic({
-        parkingId: parkingId,
-        userId: userId,
-        parkingStatus: status
-    });
+function newOffice(req, res) {
+    const office = req.body.office;
 
-    return historic.save();
+    BranchOffice.create(office)
+    .then(respondWithResult(res))
+    .catch(respondWithError(res));
 }
 
-function historicByParkingId(req, res) {
-    Historic.find({parkingId: req.query.parkingId})
-    .sort({changeStatusDate: 1})
+function getOffices(req, res) {
+    BranchOffice.find({})
     .then(respondWithResult(res))
     .catch(respondWithError(res));
 }
 
 module.exports = {
-    createHistoric,
-    historicByParkingId
-}
+    newOffice, getOffices
+};

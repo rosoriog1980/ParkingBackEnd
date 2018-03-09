@@ -22,9 +22,16 @@ function respondWithError(res, code) {
 }
 
 function getParkingLots(req, res){
-    Parking.find({})
-    .then(respondWithResult(res))
-    .catch(respondWithError(res));
+    const zoneId = req.query.zoneId;
+    if (zoneId !== undefined) {
+        Parking.find({parkingZoneId: zoneId})
+        .then(respondWithResult(res))
+        .catch(respondWithError(res));
+    } else {
+        Parking.find({})
+        .then(respondWithResult(res))
+        .catch(respondWithError(res));
+    }
 }
 
 function newParking(req, res) {
@@ -37,10 +44,11 @@ function newParking(req, res) {
 }
 
 function changeStatus(req, res) {
-    const { id, status, userId } = req.body;
+    const { id, status, userId, spaceId } = req.body;
     const user = status === 'AVAILABLE' ? undefined : userId;
-    Parking.findByIdAndUpdate(id, { $set:{ parkingStatus: status, userId: user } },{ new: true })
-    .then(parking => createHistoric(parking, userId))
+    Parking.update({"_id": id, "parkings._id": spaceId}, 
+        {$set: {"parkings.$.parkingStatus": status, "parkings.$.userId": user}}, {new: true})
+    .then(res => createHistoric(id, userId, status))
 	.then(respondWithResult(res))
 	.catch(respondWithError(res));
 }
@@ -49,6 +57,20 @@ function deleteParking(req, res) {
     Parking.findByIdAndRemove(req.query.id)
     .then(respondWithResult(res))
     .catch(respondWithError(res));
+}
+
+function removeParkingSpace(parking, spaceId){
+    let indexToRemove = undefined;
+    parking.parkings.forEach(function(element, index){
+        if (element._id === spaceId) {
+            indexToRemove = index;
+        }
+    });
+    if (indexToRemove !== undefined) {
+        parking.parkings.splice(indexToRemove,1);
+    }
+
+    return parking.save();
 }
 
 module.exports = {

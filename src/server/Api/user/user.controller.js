@@ -30,6 +30,7 @@ function getUsers(req, res) {
         .catch(respondWithError(res));
     } else {
         User.find({loginToken: Token},'-userPassword -loginToken')
+        .populate('branchOfficeId')
         .then(respondWithResult(res))
         .catch(respondWithError(res));
     }

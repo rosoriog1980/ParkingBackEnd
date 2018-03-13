@@ -2,7 +2,10 @@ const mongoose = require('mongoose');
 const {Schema} = require('mongoose');
 
 const parkingFieldSchema = new Schema({
-    parkingZoneId: {type: Schema.Types.ObjectId, ref: 'ParkingZone', required:true},
+    parkingZone: {
+        parkingZoneId: {type: Schema.Types.ObjectId, ref: 'ParkingZone', required:true},
+        zoneName: {type: String, required: true}
+    },
     floorNumber: {type: Number, required: true},
     parkings: [
         {

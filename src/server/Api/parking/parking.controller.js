@@ -77,29 +77,54 @@ function removeParkingSpace(parking, spaceId){
 
 function homeQuery(req, res){
     const officeId = req.query.officeId;
-    const resul = {
-        zones: []
-    };
     let countAvailable = 0;
-
+    const idZones = []; 
     ParkingZone.find({branchOfficeId: officeId})
-    .then(parkingZones => {
-        parkingZones.forEach(zone => {
-            Parking.find({parkingZoneId: zone._id})
-            .then(parkings => {
-                parkings.forEach(park => {
-                    park.parkings.forEach(space => {
-                        countAvailable += 1;
-                    });
-                    resul.zones.push(
-                        {
-                            zoneName: zone.zoneName,
-                            availabiity: countAvailable
-                        }
-                    );
-                });
+    .then(zones => {
+        zones.forEach(item => {
+            idZones.push(item._id);
+        });
+        getAvailableParkingsInZone(idZones)
+        .then(resul => {
+            addZoneName(zones, resul)
+            .then(homeInfo => {
+                res.send(homeInfo);
+                respondWithResult(res);
+            })
+        });
+    });
+}
+
+function getAvailableParkingsInZone(zones){
+    const rules = [{'parkingZone.parkingZoneId':{ $in: zones}, "parkings.parkingStatus": "AVAILABLE" }];
+    return new Promise(resolve =>{
+        Parking.aggregate([
+            {$unwind: ("$parkings")},
+            { $match: {$and: rules}},
+            {
+                $group: {
+                    _id: '$parkingZone.parkingZoneId',
+                    count: {$sum: 1}
+                }
+            },
+            
+        ], function(err,result){
+            resolve(result);
+        });
+    });
+}
+
+function addZoneName(zones, homeQ){
+    resulHomeQ = [];
+    return new Promise(resolve => {
+        zones.forEach(item => {
+            homeQ.forEach(homeInfo => {
+                if (homeInfo._id.toString() === item._id.toString()) {
+                    homeInfo.zoneName = item.zoneName;
+                }
             });
         });
+        resolve(homeQ);
     });
 }
 

@@ -1,7 +1,9 @@
 const status = require('http-status');
 const Parking = require('./parking.model');
+const ParkingZone = require('../parkingZone/parkingZone.model');
 const parkingStatusEnum = require('./parking.statusEnum');
 const { createHistoric } = require('../historic/historic.controller');
+const { getZones } = require('../parkingZone/parkingZone.controller');
 
 function respondWithResult(res, code) {
     const statusCode = code || status.OK;
@@ -24,7 +26,7 @@ function respondWithError(res, code) {
 function getParkingLots(req, res){
     const zoneId = req.query.zoneId;
     if (zoneId !== undefined) {
-        Parking.find({parkingZoneId: zoneId})
+        Parking.find({"parkingZone.parkingZoneId": zoneId})
         .then(respondWithResult(res))
         .catch(respondWithError(res));
     } else {
@@ -73,6 +75,57 @@ function removeParkingSpace(parking, spaceId){
     return parking.save();
 }
 
+function homeQuery(req, res){
+    const officeId = req.query.officeId;
+    let countAvailable = 0;
+    const idZones = []; 
+    ParkingZone.find({branchOfficeId: officeId})
+    .then(zones => {
+        zones.forEach(item => {
+            idZones.push(item._id);
+        });
+        getAvailableParkingsInZone(idZones)
+        .then(resul => {
+            addZoneName(zones, resul)
+            .then(homeInfo => {
+                res.send(homeInfo);
+                respondWithResult(res);
+            })
+        });
+    });
+}
+
+function getAvailableParkingsInZone(zones){
+    const rules = [{'parkingZone.parkingZoneId':{ $in: zones}, "parkings.parkingStatus": "AVAILABLE" }];
+    return new Promise(resolve =>{
+        Parking.aggregate([
+            {$unwind: ("$parkings")},
+            { $match: {$and: rules}},
+            {
+                $group: {
+                    _id: '$parkingZone.parkingZoneId',
+                    count: {$sum: 1}
+                }
+            },
+            
+        ], function(err,result){
+            resolve(result);
+        });
+    });
+}
+
+function addZoneName(zones, homeQ){
+    resulHomeQ = [];
+    return new Promise(resolve => {
+        homeQ.forEach(item => {
+            item.zoneName = zones.find(z =>{
+                 return z._id.toString() === item._id.toString()
+                })["zoneName"];
+        });
+        resolve(homeQ);
+    });
+}
+
 module.exports = {
-    getParkingLots, newParking, changeStatus, deleteParking
+    getParkingLots, newParking, changeStatus, deleteParking, homeQuery
 };

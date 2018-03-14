@@ -26,7 +26,7 @@ function respondWithError(res, code) {
 function getParkingLots(req, res){
     const zoneId = req.query.zoneId;
     if (zoneId !== undefined) {
-        Parking.find({parkingZoneId: zoneId})
+        Parking.find({"parkingZone.parkingZoneId": zoneId})
         .then(respondWithResult(res))
         .catch(respondWithError(res));
     } else {
@@ -117,12 +117,10 @@ function getAvailableParkingsInZone(zones){
 function addZoneName(zones, homeQ){
     resulHomeQ = [];
     return new Promise(resolve => {
-        zones.forEach(item => {
-            homeQ.forEach(homeInfo => {
-                if (homeInfo._id.toString() === item._id.toString()) {
-                    homeInfo.zoneName = item.zoneName;
-                }
-            });
+        homeQ.forEach(item => {
+            item.zoneName = zones.find(z =>{
+                 return z._id.toString() === item._id.toString()
+                })["zoneName"];
         });
         resolve(homeQ);
     });

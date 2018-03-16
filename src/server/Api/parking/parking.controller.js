@@ -88,7 +88,7 @@ function homeQuery(req, res){
         .then(resul => {
             addZoneName(zones, resul)
             .then(homeInfo => {
-                res.send(homeInfo);
+                res.send(homeInfo.sort(sortResul));
                 respondWithResult(res);
             })
         });
@@ -124,6 +124,16 @@ function addZoneName(zones, homeQ){
         });
         resolve(homeQ);
     });
+}
+
+function sortResul(a, b){
+    if (a.zoneName > b.zoneName) {
+        return 1;
+      }
+      if (a.zoneName < b.zoneName) {
+        return -1;
+      }
+      return 0;
 }
 
 module.exports = {

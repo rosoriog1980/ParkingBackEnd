@@ -46,11 +46,11 @@ function newParking(req, res) {
 }
 
 function changeStatus(req, res) {
-    const { id, status, userId, spaceId } = req.body;
+    const { status, userId, spaceId } = req.body;
     const user = status === 'AVAILABLE' ? undefined : userId;
-    Parking.update({"_id": id, "parkings._id": spaceId}, 
+    Parking.update({"parkings._id": spaceId}, 
         {$set: {"parkings.$.parkingStatus": status, "parkings.$.userId": user}}, {new: true})
-    .then(res => createHistoric(id, userId, status))
+    .then(res => createHistoric(spaceId, userId, status))
 	.then(respondWithResult(res))
 	.catch(respondWithError(res));
 }

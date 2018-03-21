@@ -86,7 +86,7 @@ function homeQuery(req, res){
         });
         getAvailableParkingsInZone(idZones)
         .then(resul => {
-            addZoneName(zones, resul)
+            addZoneInfo(zones, resul)
             .then(homeInfo => {
                 res.send(homeInfo.sort(sortResul));
                 respondWithResult(res);
@@ -114,13 +114,21 @@ function getAvailableParkingsInZone(zones){
     });
 }
 
-function addZoneName(zones, homeQ){
-    resulHomeQ = [];
+function addZoneInfo(zones, homeQ){
     return new Promise(resolve => {
-        homeQ.forEach(item => {
-            item.zoneName = zones.find(z =>{
-                 return z._id.toString() === item._id.toString()
-                })["zoneName"];
+        zones.forEach(item => {
+            var homeInfo = homeQ.find(i => {
+                return i._id.toString() === item._id.toString()
+            });
+            if (homeInfo !== undefined) {
+                homeInfo.zoneName = item.zoneName;
+            }else {
+                homeQ.push({
+                    _id: item._id,
+                    count: 0,
+                    zoneName: item.zoneName
+                });
+            }
         });
         resolve(homeQ);
     });

@@ -36,6 +36,15 @@ function getUsers(req, res) {
     }
 }
 
+function searchUser(req, res) {
+    const userId = req.query.userId;
+
+    User.find({_id: userId},'-userPassword -loginToken')
+        .populate('branchOfficeId')
+        .then(respondWithResult(res))
+        .catch(respondWithError(res));
+}
+
 function createUser(req, res) {
     const user = req.body.user;
     const vehicles = req.body.vehicles;
@@ -136,5 +145,5 @@ function apiValidateToken(req, res){
 
 
 module.exports= {
-    getUsers, createUser, deleteUser, updateUser, newVehicle, removeVehicle, loginUser, apiValidateToken
+    getUsers, searchUser, createUser, deleteUser, updateUser, newVehicle, removeVehicle, loginUser, apiValidateToken
 };

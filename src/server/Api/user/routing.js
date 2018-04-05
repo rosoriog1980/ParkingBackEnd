@@ -1,12 +1,13 @@
 const router = require('express').Router();
 const User = require('./user.model');
-const { getUsers, createUser, deleteUser, updateUser, newVehicle, removeVehicle, loginUser, apiValidateToken } = require('./user.controller');
+const { getUsers, searchUser, createUser, deleteUser, updateUser, newVehicle, removeVehicle, loginUser, apiValidateToken } = require('./user.controller');
 
 router.post('/auth', loginUser);
 router.post('/validAuth', apiValidateToken)
 router.post('/', createUser);
 
 router.get('/', isAuthenticated,  getUsers);
+router.get('/find', isAuthenticated, searchUser);
 router.put('/', isAuthenticated, updateUser);
 router.delete('/', isAuthenticated, deleteUser);
 

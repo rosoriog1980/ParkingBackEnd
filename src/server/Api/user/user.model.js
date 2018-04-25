@@ -16,7 +16,10 @@ const userSchema = new Schema({
             vehicleColor: {type: String, required: false},
             vehicleImage: {type: String, required: false}
         }
-    ]
+    ],
+    active: {type: Boolean, required: true, default: false},
+    hash: {type: String, required: true}
+    
 });
 
 module.exports = mongoose.model('User', userSchema);

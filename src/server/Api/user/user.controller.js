@@ -1,6 +1,7 @@
 const status = require('http-status');
 const User = require('./user.model');
 const Guid = require('guid');
+var Config = require('../config');
 
 
 function respondWithResult(res, code) {
@@ -49,11 +50,48 @@ function createUser(req, res) {
     const user = req.body.user;
     const vehicles = req.body.vehicles;
 
+    var hash = makeHash();
+    var userEmail = user.userEmail;
+
+    user.hash = hash
+
     User.create(user)
     .then(user => addVehicles(user, vehicles))
     .then(respondWithResult(res))
     .catch(respondWithError(res));
+
+    
+    var transporter = nodemailer.createTransport({
+        service: "Gmail",
+        auth: {
+            user: Config.gmail.user_name,
+            pass: Config.gmail.password
+        }
+    });
+    
+    const mailOptions = {
+        to: userEmail, // list of receivers
+        subject: 'Parqueo PSL - Activa tu usuario', // Subject line
+        html: '<br><h1 style="text-align: center;"><span style="color: #008080;"><strong>PARQUEO</strong></span></h1><br><p style="text-align: center;">Bienvenido a Parqueo. Activa tu cuenta:</p><h2 style="text-align: center;"><span style="background-color: #008080;"><strong><span style="color: #ffffff;"><a href="' + urlSetPassword + hash +'" style="color: #ffffff;">&nbsp;ACTIVAR&nbsp;</a></span></strong></span></h2><p style="text-align: center;"></p>'// plain text body
+    };  
+
+    transporter.sendMail(mailOptions, function (err, info) {
+        if(err)
+          return res.status(500).send({message: 'Error en la petición.'});
+          
+        return res.status(200).send({message: 'Envio exitoso.'});
+     });
 }
+
+function makeHash() {
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  
+    for (var i = 0; i < 20; i++)
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+  
+    return text;
+  }
 
 function deleteUser(req, res) {
     User.findByIdAndRemove(req.query.id)

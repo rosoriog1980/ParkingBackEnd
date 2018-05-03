@@ -1,7 +1,8 @@
 const status = require('http-status');
 const User = require('./user.model');
+const PasswordChangeToken = require('./passwordChangeToken.model');
 const Guid = require('guid');
-var Config = require('../config');
+const Config = require('../config');
 
 
 function respondWithResult(res, code) {
@@ -53,18 +54,22 @@ function createUser(req, res) {
     var hash = makeHash();
     var userEmail = user.userEmail;
 
-    user.hash = hash
+    var passwordChangeToken;
+    passwordChangeToken.userName = user.userName;
+    passwordChangeToken.hash = hash = hash
 
     User.create(user)
     .then(user => addVehicles(user, vehicles))
-    .then(respondWithResult(res))
+    .then(
+        respondWithResult(res))
     .catch(respondWithError(res));
 
+    PasswordChangeToken.create(passwordChangeToken)
     
     var transporter = nodemailer.createTransport({
         service: "Gmail",
         auth: {
-            user: Config.gmail.user_name,
+            user: Config.gmail.userName,
             pass: Config.gmail.password
         }
     });
@@ -77,9 +82,9 @@ function createUser(req, res) {
 
     transporter.sendMail(mailOptions, function (err, info) {
         if(err)
-          return res.status(500).send({message: 'Error en la petición.'});
+          return respondWithResult({message: 'Error en la petición.'}, 500)
           
-        return res.status(200).send({message: 'Envio exitoso.'});
+        return respondWithResult({message: 'Envio exitoso.'}) 
      });
 }
 
@@ -91,7 +96,32 @@ function makeHash() {
       text += possible.charAt(Math.floor(Math.random() * possible.length));
   
     return text;
-  }
+}
+
+function setPassword(req, res){
+    var hash = req.hash;
+    var userName
+
+    PasswordChangeToken.findOne({ 'hash': hash }, 'userName', function (err, passwordChangeToken) {
+        if (err) return res.status(500).send({message: 'Error en la petición.'});
+        
+        userName = passwordChangeToken.userName;
+    });
+
+    
+    User.find({ 'userName': userName }, function (err, user) {
+        if (err) return handleError(err);
+      
+        user.set({ password: req.newPassword });
+        user.save(function (err, user) {
+          if(err)
+            return respondWithResult({message: 'Error en la petición.'}, 500)
+            
+          return respondWithResult({message: 'Envio exitoso.'}) 
+        });
+      });
+}
+
 
 function deleteUser(req, res) {
     User.findByIdAndRemove(req.query.id)

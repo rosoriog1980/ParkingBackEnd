@@ -10,6 +10,9 @@ router.get('/', isAuthenticated,  getUsers);
 router.get('/find', isAuthenticated, searchUser);
 router.put('/', isAuthenticated, updateUser);
 router.delete('/', isAuthenticated, deleteUser);
+router.post('/updatePassword', updatePassword);
+
+updatePassword
 
 router.post('/vehicle', newVehicle);
 router.delete('/vehicle',  removeVehicle);

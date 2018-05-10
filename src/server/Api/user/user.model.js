@@ -17,8 +17,7 @@ const userSchema = new Schema({
             vehicleImage: {type: String, required: false}
         }
     ],
-    active: {type: Boolean, required: true, default: false},
-    hash: {type: String, required: true}
+    active: {type: Boolean, required: true, default: false}
     
 });
 

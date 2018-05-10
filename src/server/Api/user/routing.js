@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const User = require('./user.model');
-const { getUsers, searchUser, createUser, deleteUser, updateUser, newVehicle, removeVehicle, loginUser, apiValidateToken } = require('./user.controller');
+const { getUsers, searchUser, createUser, deleteUser, updateUser, newVehicle, removeVehicle, loginUser, apiValidateToken, updatePassword } = require('./user.controller');
 
 router.post('/auth', loginUser);
 router.post('/validAuth', apiValidateToken)

@@ -19,6 +19,8 @@ const userSchema = new Schema({
     ],
     active: {type: Boolean, required: true, default: false}
     
+}, {
+    usePushEach: true
 });
 
 module.exports = mongoose.model('User', userSchema);

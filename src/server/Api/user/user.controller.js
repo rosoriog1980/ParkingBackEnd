@@ -50,50 +50,59 @@ function searchUser(req, res) {
 }
 
 function createUser(req, res) {    
-    var user = req.body;
-
-    console.log(req);
+        
+    var user = req.body.user;
 
     const vehicles = req.body.vehicles;
 
     var hash = makeHash();
     var userEmail = user.userEmail;
-
-    var passwordChangeToken = PasswordChangeToken;
+    
+    var passwordChangeToken = new PasswordChangeToken;
     passwordChangeToken.userName = user.userName;
     passwordChangeToken.hash = hash 
 
+
     User.create(user)
     .then(user => addVehicles(user, vehicles))
-    .then(function(err){
+    .then(function(result){
+        passwordChangeToken.save().then(item => {
+
+            var transporter = Nodemailer.createTransport({
+                service: "Gmail",
+                auth: {
+                    user: Config.gmail.userName,
+                    pass: Config.gmail.password            
+                }
+            });
+
+            var urlWebApp = Config.web.url + '/newpassword/' + hash;
+
+            const mailOptions = {
+                to: userEmail, // list of receivers
+                subject: 'Parqueo PSL - Activa tu usuario', // Subject line
+                html: '<br><h1 style="text-align: center;"><span style="color: #008080;"><strong>PARQUEO</strong></span></h1><br><p style="text-align: center;">Bienvenido a Parqueo. Activa tu cuenta:</p><h2 style="text-align: center;"><span style="background-color: #008080;"><strong><span style="color: #ffffff;"><a href="' + urlWebApp + '" style="color: #ffffff;">&nbsp;ACTIVAR&nbsp;</a></span></strong></span></h2><p style="text-align: center;"></p>'// plain text body
+            };  
             
-        PasswordChangeToken.create(passwordChangeToken)
-        
-        var transporter = Nodemailer.createTransport({
-            service: "Gmail",
-            auth: {
-                user: Config.gmail.userName,
-                pass: Config.gmail.password            
-            }
-        });
+            console.log('will send')
 
-        var urlWebApp = Config.web.url + '/newpassword/' + hash;
+            transporter.sendMail(mailOptions, function (err, info) {
 
-        const mailOptions = {
-            to: userEmail, // list of receivers
-            subject: 'Parqueo PSL - Activa tu usuario', // Subject line
-            html: '<br><h1 style="text-align: center;"><span style="color: #008080;"><strong>PARQUEO</strong></span></h1><br><p style="text-align: center;">Bienvenido a Parqueo. Activa tu cuenta:</p><h2 style="text-align: center;"><span style="background-color: #008080;"><strong><span style="color: #ffffff;"><a href="' + urlWebApp + '" style="color: #ffffff;">&nbsp;ACTIVAR&nbsp;</a></span></strong></span></h2><p style="text-align: center;"></p>'// plain text body
-        };  
+                console.log('sending')
 
-        transporter.sendMail(mailOptions, function (err, info) {
-
-            console.log('sending')
-
-            if(err)
-            return respondWithResult({message: 'Error en la petición.'}, 500)
-            
-            return respondWithResult({message: 'Registro exitoso.'}) 
-        });
+                if(err)
+                    return respondWithResult({message: 'Error en la petición.'}, 500)
+                
+                return res.status(200).send({
+                    message: 'Registro exitoso.'
+                })
+            });
+        })
+        .catch(err => {
+            res.status(400).send("unable to save to database");
+        })
+    }, function (err){
+        if(err) return respondWithResult({message: 'Error en la petición.'}, 500)  
     })
     .catch(respondWithError(res));
 
@@ -111,6 +120,9 @@ function makeHash() {
 
 function updatePassword(req, res){    
     var params = req.body;
+
+
+
     var hash = params.hash;
     var userName
 

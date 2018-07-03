@@ -4,7 +4,7 @@ const PasswordChangeToken = require('./passwordChangeToken.model');
 const Guid = require('guid');
 const Config = require('../../config/config');
 const Nodemailer = require('nodemailer');
-var bcrypt = require('bcrypt');
+var bcrypt = require('bcrypt-nodejs');
 
 
 function respondWithResult(res, code) {
@@ -62,6 +62,11 @@ function createUser(req, res) {
     passwordChangeToken.userName = user.userName;
     passwordChangeToken.hash = hash 
 
+    User.findOne({ 'userName': userName }, function (err, user) {
+        return res.status(404).send({
+            message: 'El username ya fue registrado, por favor intente con uno nuevo.'
+        })}
+    )
 
     User.create(user)
     .then(user => addVehicles(user, vehicles))
@@ -121,42 +126,53 @@ function makeHash() {
 function updatePassword(req, res){    
     var params = req.body;
 
-
-
     var hash = params.hash;
-    var userName
+    var userName;
 
-    PasswordChangeToken.findOne({ 'hash': hash }, 'userName', function (err, passwordChangeToken) {
+    PasswordChangeToken.findOne({ 'hash': hash }, (err, passwordChangeToken) => {
         if (err) return res.status(500).send({message: 'Error en la petición.'});
         
         userName = passwordChangeToken.userName;
-    });
+        PasswordChangeToken.find({ 'hash': hash }).remove();
 
+        User.findOne({ 'userName': userName }, function (err, user) {
+            if (err) return handleError(err);
     
-    User.find({ 'userName': userName }, function (err, user) {
-        if (err) return handleError(err);
+            //Cifrar contraseña y guardar los datos
+            bcrypt.hash(params.newPassword, null, null, (err, hash) => {
+                if (err) return handleError(err);
+                user.password = hash;
+                user.active = true;
 
-        //Cifrar contraseña y guardar los datos
-        bcrypt.hash(params.newPassword, null, null, (err, hash) => {
-            user.password = hash;
-            user.save((err, userStored) => {
-                if(err){
-                    return res.status(500).send({
-                        message: 'Error al guardar el usuario.'
+                try{
+
+                    user.save((err, userStored) => {
+                        if(err){
+                            return res.status(500).send({
+                                message: 'Error al guardar el usuario.'
+                            })
+                        }
+                        if(userStored){
+                            res.status(200).send({
+                                user: userStored
+                            })
+                        }else{
+                            res.status(404).send({
+                                message: 'No se ha registrado el usuario.'
+                            })
+                        }
                     })
+                } catch(e) {
+                    let errors = e.errors;
+                    res.jsonp({
+                        errors,
+                        success: false
+                    });
                 }
-                if(userStored){
-                    res.status(200).send({
-                        user: userStored
-                    })
-                }else{
-                    res.status(404).send({
-                        message: 'No se ha registrado el usuario.'
-                    })
-                }
-            })
-        })      
-    });
+            })      
+        });
+    });    
+    
 }
 
 

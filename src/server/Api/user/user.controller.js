@@ -62,55 +62,51 @@ function createUser(req, res) {
     passwordChangeToken.userName = user.userName;
     passwordChangeToken.hash = hash 
 
-    User.findOne({ 'userName': userName }, function (err, user) {
-        return res.status(404).send({
-            message: 'El username ya fue registrado, por favor intente con uno nuevo.'
-        })}
-    )
+    User.findOne({ $or:[ {'userName': user.userName}, {'userEmail':user.userEmail} ] }, function (err, registredUser) {
+        if(registredUser){
+            return res.status(404).send({
+                message: 'El username o email ya fue registrado, por favor intente con uno nuevo.'
+            })}        
 
-    User.create(user)
-    .then(user => addVehicles(user, vehicles))
-    .then(function(result){
-        passwordChangeToken.save().then(item => {
+        User.create(user)
+        .then(user => addVehicles(user, vehicles))
+        .then(function(result){
+            passwordChangeToken.save().then(item => {
 
-            var transporter = Nodemailer.createTransport({
-                service: "Gmail",
-                auth: {
-                    user: Config.gmail.userName,
-                    pass: Config.gmail.password            
-                }
-            });
+                var transporter = Nodemailer.createTransport({
+                    service: "Gmail",
+                    auth: {
+                        user: Config.gmail.userName,
+                        pass: Config.gmail.password            
+                    }
+                });
 
-            var urlWebApp = Config.web.url + '/newpassword/' + hash;
+                var urlWebApp = Config.web.url + '/newpassword/' + hash;
 
-            const mailOptions = {
-                to: userEmail, // list of receivers
-                subject: 'Parqueo PSL - Activa tu usuario', // Subject line
-                html: '<br><h1 style="text-align: center;"><span style="color: #008080;"><strong>PARQUEO</strong></span></h1><br><p style="text-align: center;">Bienvenido a Parqueo. Activa tu cuenta:</p><h2 style="text-align: center;"><span style="background-color: #008080;"><strong><span style="color: #ffffff;"><a href="' + urlWebApp + '" style="color: #ffffff;">&nbsp;ACTIVAR&nbsp;</a></span></strong></span></h2><p style="text-align: center;"></p>'// plain text body
-            };  
-            
-            console.log('will send')
+                const mailOptions = {
+                    to: userEmail, // list of receivers
+                    subject: 'Parqueo PSL - Activa tu usuario', // Subject line
+                    html: '<div style="font-family: sans-serif !important;"><br /><h1 style="text-align: center;"><span style="color: #808080;"><strong>PARQUEO</strong></span></h1><p>&nbsp;</p><p style="text-align: center;">Bienvenido a Parqueo. Activa tu cuenta:</p><p>&nbsp;</p><h2 style="text-align: center;"><a style="color: #ffffff; font-size: 25px !important; border-radius: 100px; background-color: #ff6500; height: 50px; padding: 0.6em; text-decoration: none;" href="' + urlWebApp + '"><span style="color: #ffffff;">&nbsp;ACTIVAR&nbsp;</span></a></h2></div>'
+                };  
 
-            transporter.sendMail(mailOptions, function (err, info) {
+                transporter.sendMail(mailOptions, function (err, info) {
 
-                console.log('sending')
-
-                if(err)
-                    return respondWithResult({message: 'Error en la petición.'}, 500)
-                
-                return res.status(200).send({
-                    message: 'Registro exitoso.'
-                })
-            });
+                    if(err)
+                        return respondWithResult({message: 'Error en la petición.'}, 500)
+                    
+                    return res.status(200).send({
+                        message: 'Registro exitoso.'
+                    })
+                });
+            })
+            .catch(err => {
+                res.status(400).send("unable to save to database");
+            })
+        }, function (err){
+            if(err) return respondWithResult({message: 'Error en la petición.'}, 500)  
         })
-        .catch(err => {
-            res.status(400).send("unable to save to database");
-        })
-    }, function (err){
-        if(err) return respondWithResult({message: 'Error en la petición.'}, 500)  
-    })
-    .catch(respondWithError(res));
-
+        .catch(respondWithError(res))
+    })    
 }
 
 function makeHash() {
@@ -133,44 +129,45 @@ function updatePassword(req, res){
         if (err) return res.status(500).send({message: 'Error en la petición.'});
         
         userName = passwordChangeToken.userName;
-        PasswordChangeToken.find({ 'hash': hash }).remove();
-
-        User.findOne({ 'userName': userName }, function (err, user) {
-            if (err) return handleError(err);
-    
-            //Cifrar contraseña y guardar los datos
-            bcrypt.hash(params.newPassword, null, null, (err, hash) => {
+        PasswordChangeToken.find({ 'hash': hash }).remove()
+        .then(
+            User.findOne({ 'userName': userName }, function (err, user) {
                 if (err) return handleError(err);
-                user.password = hash;
-                user.active = true;
+        
+                //Cifrar contraseña y guardar los datos
+                bcrypt.hash(params.newPassword, null, null, (err, hash) => {
+                    if (err) return handleError(err);
+                    user.userPassword = hash;
+                    user.active = true;
 
-                try{
+                    try{
 
-                    user.save((err, userStored) => {
-                        if(err){
-                            return res.status(500).send({
-                                message: 'Error al guardar el usuario.'
-                            })
-                        }
-                        if(userStored){
-                            res.status(200).send({
-                                user: userStored
-                            })
-                        }else{
-                            res.status(404).send({
-                                message: 'No se ha registrado el usuario.'
-                            })
-                        }
-                    })
-                } catch(e) {
-                    let errors = e.errors;
-                    res.jsonp({
-                        errors,
-                        success: false
-                    });
-                }
-            })      
-        });
+                        user.save((err, userStored) => {
+                            if(err){
+                                return res.status(500).send({
+                                    message: 'Error al guardar el usuario.'
+                                })
+                            }
+                            if(userStored){
+                                res.status(200).send({
+                                    user: userStored
+                                })
+                            }else{
+                                res.status(404).send({
+                                    message: 'No se ha registrado el usuario.'
+                                })
+                            }
+                        })
+                    } catch(e) {
+                        let errors = e.errors;
+                        res.jsonp({
+                            errors,
+                            success: false
+                        });
+                    }
+                })      
+            })
+        )
     });    
     
 }
@@ -231,12 +228,12 @@ function deleteVehicle(user, vehicleId){
 }
 
 function loginUser(req, res) {
-    const userName = req.body.user;
+    const userEmail = req.body.user;
     const userPwd = req.body.pwd;
 
-    User.findOne({userEmail: userName, userPassword: userPwd})
+    User.findOne({userEmail: userEmail})
     .then(user => {
-        bcrypt.compare(password, user.password, (err, check) => {
+        bcrypt.compare(userPwd, user.userPassword, (err, check) => {
             if(err){
                 return res.status(500).send({
                     message: 'Error en la petición.'
